@@ -27,3 +27,10 @@ where = ["smart_renamer"]
 
 [tool.setuptools.package-data]
 "smart_renamer" = ["*.json"]
+
+[tool.poetry]
+name = "smart_renamer"
+version = "0.1.0"
+description = "A versatile file renaming utility"
+authors = ["Coby Amar <youremail@example.com>"]
+license = "MIT"
