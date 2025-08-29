@@ -1,14 +1,16 @@
 # # SPDX-License-Identifier: MIT
 # # Copyright (c) 2025 Coby Amar
 
+import io
 import json
+import sys
 import threading
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox, scrolledtext
 
 # Import functions from CLI script
-from .renamer import match_and_rename_files, test_regex, undo_from_log
+from smart_renamer.renamer import match_and_rename_files, test_regex, undo_from_log
 
 
 class RenamerGUI:
@@ -26,22 +28,22 @@ class RenamerGUI:
         tk.Button(root, text="Browse", command=self.browse_dir).grid(row=0, column=2)
 
         # Glob pattern
-        tk.Label(root, text="Glob Match:").grid(row=1, column=0, sticky="w")
-        self.match_var = tk.StringVar(value="*.txt")
+        tk.Label(root, text="Glob Match: *.txt").grid(row=1, column=0, sticky="w")
+        self.match_var = tk.StringVar(value="")
         tk.Entry(root, textvariable=self.match_var, width=40).grid(
             row=1, column=1, padx=5, pady=5
         )
 
         # Regex pattern
-        tk.Label(root, text="Regex Pattern:").grid(row=2, column=0, sticky="w")
-        self.regex_var = tk.StringVar(value=r"(.*)")
+        tk.Label(root, text="Regex Pattern: r(.*)").grid(row=2, column=0, sticky="w")
+        self.regex_var = tk.StringVar(value="")
         tk.Entry(root, textvariable=self.regex_var, width=40).grid(
             row=2, column=1, padx=5, pady=5
         )
 
         # Rename pattern
-        tk.Label(root, text="Rename Pattern:").grid(row=3, column=0, sticky="w")
-        self.rename_var = tk.StringVar(value="{}.txt")
+        tk.Label(root, text="Rename Pattern: {}.txt").grid(row=3, column=0, sticky="w")
+        self.rename_var = tk.StringVar(value="")
         tk.Entry(root, textvariable=self.rename_var, width=40).grid(
             row=3, column=1, padx=5, pady=5
         )
@@ -95,9 +97,19 @@ class RenamerGUI:
 
         def wrapper():
             try:
+                # Capture prints
+                old_stdout = sys.stdout
+                sys.stdout = io.StringIO()
+
                 func(*args, **kwargs)
+
+                # Get all printed text and log it
+                output = sys.stdout.getvalue()
+                self.log(output.strip())
             except Exception as e:
                 self.log(f"Error: {e}")
+            finally:
+                sys.stdout = old_stdout
 
         threading.Thread(target=wrapper, daemon=True).start()
 
