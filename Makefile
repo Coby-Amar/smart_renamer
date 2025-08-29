@@ -5,6 +5,9 @@ PYTHON = python3
 
 .PHONY: install build clean dist gui cli
 
+setup: requirements.txt
+    pip install -r requirements.txt
+
 # Install package in editable mode (for development)
 install:
 	$(PYTHON) -m pip install -e .

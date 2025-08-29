@@ -3,11 +3,11 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "smart-renamer"
+name = "smart_renamer"
 version = "0.1.0"
 description = "A smart regex-based file renaming utility with CLI and GUI"
 authors = [
-    { name = "Your Name", email = "you@example.com" }
+    { name = "Coby Amar", email = "cobyamar+github@gmail.com" }
 ]
 readme = "README.md"
 license = { text = "MIT" }
@@ -15,15 +15,15 @@ requires-python = ">=3.8"
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/yourname/smart-renamer"
-Issues = "https://github.com/yourname/smart-renamer/issues"
+Homepage = "https://github.com/Coby-Amar/smart_renamer"
+Issues = "https://github.com/Coby-Amar/smart_renamer/issues"
 
 [project.scripts]
-smart-renamer = "smart_renamer.cli:main"
-smart-renamer-gui = "smart_renamer.gui:main"
+smart_renamer = "smart_renamer.cli:main"
+smart_renamer_gui = "smart_renamer.gui:main"
 
 [tool.setuptools.packages.find]
-where = ["smart_renamer"]
+where = ["./"]
 
 [tool.setuptools.package-data]
 "smart_renamer" = ["*.json"]
