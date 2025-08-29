@@ -23,25 +23,25 @@ It allows batch renaming files safely, previewing changes, and undoing operation
 ### Clone and install
 
 ```bash
-git clone https://github.com/yourname/smart-renamer.git
-cd smart-renamer
+git clone https://github.com/Coby-Amar/smart_renamer.git
+cd smart_renamer
 pip install -e .
 ```
 
 ## 🚀 Usage
 ### Preview renaming without applying changes
 ```bash
-smart-renamer -m "*.txt" -r "file_(\d+)" -p "doc_{}.txt" --dry-run
+smart_renamer -m "*.txt" -r "file_(\d+)" -p "doc_{}.txt" --dry-run
 ```
 
 ### Apply renaming
 ```bash
-smart-renamer -m "*.txt" -r "file_(\d+)" -p "doc_{}.txt"
+smart_renamer -m "*.txt" -r "file_(\d+)" -p "doc_{}.txt"
 ```
 
 ### Undo last rename operation
 ```bash
-smart-renamer --undo latest
+smart_renamer --undo latest
 ```
 
 ## 🛠 Development
@@ -78,5 +78,5 @@ make clean
 
 ## 📝 Examples
 ```bash
-smart-renamer -m "*.txt" -r "file_(\d+)" -p "doc_{}.txt"
+smart_renamer -m "*.txt" -r "file_(\d+)" -p "doc_{}.txt"
 ```

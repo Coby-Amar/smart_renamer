@@ -1,7 +1,6 @@
 # Project variables
+PYTHON = python
 PACKAGE = smart_renamer
-APPNAME = SmartRenamer
-PYTHON = python3
 
 .PHONY: install build clean dist gui cli
 
@@ -18,7 +17,7 @@ build:
 
 # Build standalone GUI executable with PyInstaller
 gui:
-	pyinstaller --onefile --noconsole $(PACKAGE)/gui.py -n $(APPNAME)
+	pyinstaller --onefile --noconsole $(PACKAGE)/gui.py -n SmartRenamer
 
 # Build CLI executable with PyInstaller (optional)
 cli:
