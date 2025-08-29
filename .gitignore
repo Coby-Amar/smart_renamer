@@ -27,9 +27,6 @@ smart_renamer_log_*.json
 .idea/
 *.iml
 
-# ENV files
-venv/
-
 # OS files
 .DS_Store
 Thumbs.db
