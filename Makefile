@@ -1,5 +1,5 @@
 # Project variables
-PYTHON = python
+PYTHON = py
 PACKAGE = smart_renamer
 
 .PHONY: install build clean dist gui cli
@@ -26,7 +26,6 @@ cli:
 # Clean up build artifacts
 clean:
 	rm -rf build dist *.egg-info __pycache__ .pytest_cache
-	find . -type d -name "__pycache__" -exec rm -rf {} +
 
 # Full release build (wheel + sdist + executables)
 dist: clean build gui cli
