@@ -1,0 +1,44 @@
+{
+    "timestamp": {
+        "description": "Timestamp of when the operation was performed",
+        "type": "string",
+        "format": "date-time"
+    },
+    "directory": {
+        "description": "Directory where the files are located ie. /path/to/files",
+        "type": "string"
+    },
+    "match": {
+        "description": "Glob pattern to match files ie. *.txt or image_*.png",
+        "type": "string"
+    },
+    "regex": {
+        "description": "Regular expression pattern to identify parts of the filename to be replaced",
+        "type": "string"
+    },
+    "pattern": {
+        "description": "Renaming pattern using regex groups ie. 'new_name_\\1.txt' where \\1 is the first captured group",
+        "type": "string"
+    },
+    "operations": {
+        "description": "List of changes to be made",
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                "from": {
+                    "description": "Current name of the file",
+                    "type": "string"
+                },
+                "to": {
+                    "description": "New name for the file",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "form",
+                "to"
+            ]
+        }
+    }
+}

@@ -1,0 +1,6 @@
+DIRECTORY = "directory"
+MATCH = "match"
+REGEX = "regex"
+PATTERN = "pattern"
+OPERATIONS = "operations"
+TIMESTAMP = "timestamp"

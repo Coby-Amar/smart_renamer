@@ -10,7 +10,13 @@ from pathlib import Path
 from tkinter import filedialog, messagebox, scrolledtext
 
 # Import functions from CLI script
-from smart_renamer.renamer import match_and_rename_files, test_regex, undo_from_log
+from smart_renamer.constants import DIRECTORY, MATCH, OPERATIONS, PATTERN, REGEX
+from smart_renamer.renamer import (
+    match_and_rename_files,
+    test_regex,
+    undo,
+    undo_from_log,
+)
 
 
 class RenamerGUI:
@@ -48,31 +54,27 @@ class RenamerGUI:
             row=3, column=1, padx=5, pady=5
         )
 
-        # Options
-        self.dry_var = tk.BooleanVar(value=True)
-        self.yes_var = tk.BooleanVar(value=False)
-        tk.Checkbutton(root, text="Dry Run", variable=self.dry_var).grid(
-            row=4, column=0, sticky="w"
-        )
-        tk.Checkbutton(root, text="Auto-Yes", variable=self.yes_var).grid(
-            row=4, column=1, sticky="w"
-        )
-
         # Action buttons
         tk.Button(root, text="Test Regex", command=self.run_test).grid(
-            row=5, column=0, pady=5
+            row=4, column=0, pady=5
         )
         tk.Button(root, text="Preview Rename", command=self.run_preview).grid(
-            row=5, column=1, pady=5
+            row=4, column=1, pady=5
         )
         tk.Button(root, text="Apply Rename", command=self.run_rename).grid(
-            row=5, column=2, pady=5
+            row=4, column=2, pady=5
         )
         tk.Button(root, text="Undo", command=self.run_undo).grid(
-            row=5, column=3, pady=5
+            row=5,
+            column=0,
         )
-        tk.Button(root, text="Load JSON", command=self.load_json).grid(
-            row=5, column=4, pady=5
+        tk.Button(root, text="Load Config", command=self.load_log).grid(
+            row=5,
+            column=1,
+        )
+        tk.Button(root, text="Clear log", command=self.clear_log).grid(
+            row=5,
+            column=2,
         )
 
         # Log / output window
@@ -91,6 +93,9 @@ class RenamerGUI:
     def log(self, text):
         self.output.insert(tk.END, text + "\n")
         self.output.see(tk.END)
+
+    def clear_log(self):
+        self.output.delete("1.0", tk.END)
 
     def run_in_thread(self, func, *args, **kwargs):
         """Run heavy tasks in a background thread so GUI stays responsive"""
@@ -120,7 +125,6 @@ class RenamerGUI:
         )
 
     def run_preview(self):
-        self.log("👀 Previewing rename...")
         self.run_in_thread(
             match_and_rename_files,
             self.dir_var.get(),
@@ -128,7 +132,7 @@ class RenamerGUI:
             self.rename_var.get(),
             self.regex_var.get(),
             dry_run=True,
-            auto_yes=self.yes_var.get(),
+            auto_yes=False,
         )
 
     def run_rename(self):
@@ -141,74 +145,78 @@ class RenamerGUI:
             self.match_var.get(),
             self.rename_var.get(),
             self.regex_var.get(),
-            dry_run=self.dry_var.get(),
-            auto_yes=self.yes_var.get(),
+            dry_run=False,
+            auto_yes=True,
         )
 
     def run_undo(self):
-        self.log("⏪ Undoing last rename...")
-        self.run_in_thread(undo_from_log, "latest", auto_yes=self.yes_var.get())
+        folder_path = self.dir_var.get()
+        self.run_in_thread(
+            undo_from_log,
+            "latest",
+            folder_path=folder_path,
+            auto_yes=True,
+        )
 
-    def load_json(self):
-        """Load rename operations from a JSON log"""
+    def load_log(self):
+        """Load config from a JSON log"""
         file_path = filedialog.askopenfilename(
             title="Select JSON Log",
-            filetypes=[("JSON files", "*.json"), ("All files", "*.*")],
+            filetypes=[("JSON files", "*.json")],
         )
         if not file_path:
             return
 
         try:
             with open(file_path, "r") as f:
-                data = json.load(f)
+                config = json.load(f)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to load JSON: {e}")
             return
 
-        operations = data.get("operations", [])
-        if not operations:
-            messagebox.showwarning("No Operations", "No operations found in this log.")
+        directory = config.get(DIRECTORY, None)
+        operations = config.get(OPERATIONS, None)
+        match = config.get(MATCH, None)
+        regex = config.get(REGEX, None)
+        pattern = config.get(PATTERN, None)
+        if not directory or not Path(directory).exists():
+            messagebox.showinfo("Invalid Directory", "Directory in log does not exist.")
             return
+        if not match:
+            messagebox.showinfo(
+                "No Match Pattern", "No match pattern found in the log."
+            )
+            return
+        if not regex:
+            messagebox.showinfo(
+                "No Regex Pattern", "No regex pattern found in the log."
+            )
+            return
+        if not pattern:
+            messagebox.showinfo(
+                "No Rename Pattern", "No rename pattern found in the log."
+            )
+            return
+        self.dir_var.set(directory)
+        self.match_var.set(match)
+        self.regex_var.set(regex)
+        self.rename_var.set(pattern)
 
-        self.loaded_operations = operations
-        self.log(f"📂 Loaded {len(operations)} operations from {file_path}")
-        self.log("Preview of changes:")
-
-        for entry in operations:
-            self.log(f"{Path(entry['from']).name}  ➝  {Path(entry['to']).name}")
-
-        if messagebox.askyesno(
-            "Apply Changes?", "Do you want to reapply these changes?"
-        ):
-            self.apply_loaded_operations()
-
-    def apply_loaded_operations(self):
-        """Apply loaded operations from JSON"""
-        for entry in self.loaded_operations:
-            src = Path(entry["from"])
-            dest = Path(entry["to"])
-            if not src.exists():
-                self.log(f"⚠️ Missing file: {src}")
-                continue
-            if dest.exists():
-                self.log(f"⚠️ Conflict: {dest} already exists, skipping")
-                continue
-            try:
-                src.rename(dest)
-                self.log(f"✅ Renamed: {src.name} ➝ {dest.name}")
-            except Exception as e:
-                self.log(f"❌ Failed to rename {src} → {dest}: {e}")
-
-
-# if __name__ == "__main__":
-#     root = tk.Tk()
-#     app = RenamerGUI(root)
-#     root.mainloop()
+        self.log(f"📂 Loaded config from {file_path}")
+        if operations:
+            self.log("Preview of operations:")
+            for entry in operations:
+                self.log(f"{entry['from']}  ➝  {entry['to']}")
+            if not messagebox.askyesno("Confirm", "Proceed with undoing operations?"):
+                return
+            self.run_in_thread(undo, directory, operations)
+        else:
+            self.run_rename()
 
 
 def main():
     root = tk.Tk()
-    app = RenamerGUI(root)
+    RenamerGUI(root)
     root.mainloop()
 
 

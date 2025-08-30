@@ -26,6 +26,7 @@ cli:
 # Clean up build artifacts
 clean:
 	rm -rf build dist *.egg-info __pycache__ .pytest_cache
+	rm -rf $(PACKAGE)/__pycache__
 
 # Full release build (wheel + sdist + executables)
-dist: clean build gui cli
+dist: clean build gui cli 
